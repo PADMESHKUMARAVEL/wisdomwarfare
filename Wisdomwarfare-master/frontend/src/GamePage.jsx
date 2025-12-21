@@ -132,10 +132,10 @@ function GameCard({ title, icon, onViewRules, onEnterGame, canPlay, disabled }) 
 
   const handleEnter = () => {
     if (title === "Wisdom Warfare") {
-      if (!canPlay) {
+      /*if (!canPlay) {
         alert("You have already played the game! Each student can only play once.");
         return;
-      }
+      }*/
 
       const trimmed = code.trim().toUpperCase();
       if (!trimmed) {
@@ -167,11 +167,11 @@ function GameCard({ title, icon, onViewRules, onEnterGame, canPlay, disabled }) 
             onChange={(e) => setCode(e.target.value.toUpperCase())}
             className="w-full p-3 mb-4 bg-gray-800 border-2 border-cyan-700 rounded-lg text-white text-center placeholder-gray-400"
           />
-          {!canPlay && (
-            <div className="text-red-400 text-sm text-center mb-2 font-bold">
-              🚫 You have already played this game
-            </div>
-          )}
+         // {/*!canPlay && (
+          //  <div className="text-red-400 text-sm text-center mb-2 font-bold">
+           //   🚫 You have already played this game
+            //</div>
+         // )*/}
         </>
       )}
 
@@ -243,7 +243,9 @@ function GamePage({ user, onStartGame, onLogout }) {
   }, [user]);
 
   const checkIfUserCanPlay = async () => {
-    try {
+    setCanPlay(true);
+  setPlayCheckLoading(false);
+    /* try {
       const response = await fetch(
         `${API_BASE}/user/${user.user_id}/can-play`
       );
@@ -254,7 +256,7 @@ function GamePage({ user, onStartGame, onLogout }) {
       setCanPlay(true);
     } finally {
       setPlayCheckLoading(false);
-    }
+    }*/
   };
 
   const handleViewRules = (gameTitle) => {
@@ -281,11 +283,11 @@ function GamePage({ user, onStartGame, onLogout }) {
       alert("Please enter the game code sent by your teacher.");
       return;
     }
-
+    /*
     if (!canPlay) {
       alert("You have already played the game! Each student can only play once.");
       return;
-    }
+    }*/
 
     try {
       setEnteringGame(true);
@@ -370,11 +372,11 @@ function GamePage({ user, onStartGame, onLogout }) {
               Welcome, <span className="font-bold">{displayName}</span>
             </p>
             <p className="text-cyan-200 text-sm">{user.email}</p>
-            {!playCheckLoading && !canPlay && (
+            {/*!playCheckLoading && !canPlay && (
               <p className="text-red-300 text-sm mt-2 font-bold">
                 🚫 You have already played the game
               </p>
-            )}
+            )*/}
           </div>
         )}
       </div>
