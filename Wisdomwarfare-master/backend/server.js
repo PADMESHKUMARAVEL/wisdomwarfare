@@ -201,11 +201,11 @@ app.get("/", (req, res) => {
 
 app.get("/user/:user_id/can-play", async (req, res) => {
   try {
-    const userId = req.params.user_id;
-
+   /* const userId = req.params.user_id;
+    const sessionId = req.query.session_id  || null;
     const [existingAnswers] = await pool.query(
-      "SELECT COUNT(*) as count FROM answers WHERE user_id = ?",
-      [userId]
+      "SELECT COUNT(*) as count FROM scores WHERE user_id = ? and game_session_id = ?",
+      [userId, sessionId]
     );
 
     const canPlay = existingAnswers[0].count === 0;
@@ -215,6 +215,10 @@ app.get("/user/:user_id/can-play", async (req, res) => {
       message: canPlay
         ? "User can play the game"
         : "User has already played the game",
+    });*/
+     res.json({
+      can_play: true,
+      message: "User can play the game",
     });
   } catch (err) {
     console.error("Error checking play status:", err);
@@ -1704,10 +1708,8 @@ app.post("/teacher/games/:id/send-link", async (req, res) => {
       process.env.FRONTEND_BASE ||
       "http://localhost:3000";
 
-    // Email points to /play/<game_code>
-    const playLink = `${clientBase.replace(/\/$/, "")}/play/${encodeURIComponent(
-      game.game_code
-    )}`;
+    // Email should point to the Welcome page (root) instead of /play
+    const playLink = `${clientBase.replace(/\/$/, "")}/`;
 
     // -----------------------------
     //  Resolve recipients

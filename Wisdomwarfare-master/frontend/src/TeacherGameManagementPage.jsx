@@ -1327,7 +1327,7 @@ function TeacherGameManagementPage() {
         );
       }
 
-      const link = sendData.link || `${window.location.origin}/play/${gameCode}`;
+      const link = sendData.link || `${window.location.origin}/`;
 
       try {
         await navigator.clipboard.writeText(link);
