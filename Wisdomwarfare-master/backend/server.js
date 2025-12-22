@@ -2098,7 +2098,7 @@ app.get("/", (req, res) => {
 app.use((req, res) => {
   res.status(404).json({ error: "Not Found", path: req.originalUrl });
 });
-
+/*
 // ----- Start server -----
 function startServer(port) {
   server
@@ -2132,4 +2132,25 @@ function startServer(port) {
     });
 }
 
-startServer(DEFAULT_PORT);
+startServer(process.env.PORT);*/
+const PORT = process.env.PORT || 4001;
+
+server.listen(PORT, () => {
+  SERVER_PORT = PORT;
+
+  console.log(`🚀 Server running on port ${PORT}`);
+
+  // Background init AFTER server is live
+  setTimeout(async () => {
+    try {
+      const count = await loadQuestions();
+      if (count === 0) {
+        console.log("❌ No questions found.");
+      } else {
+        console.log(`✅ ${count} questions loaded successfully`);
+      }
+    } catch (err) {
+      console.error("Question load error:", err);
+    }
+  }, 2000);
+});
