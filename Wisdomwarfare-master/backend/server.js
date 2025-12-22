@@ -8,7 +8,7 @@ const multer = require("multer");
 const csv = require("csv-parser");
 const fs = require("fs");
 const path = require("path");
-const fetch = require("node-fetch"); // ensure node-fetch is installed if using Node <=18; Node18+ has global fetch
+//const fetch = require("node-fetch"); // ensure node-fetch is installed if using Node <=18; Node18+ has global fetch
 const nodemailer = require("nodemailer");
 
 const app = express();
@@ -54,13 +54,12 @@ const io = new Server(server, {
 
 // ----- DB -----
 const pool = mysql.createPool({
-  host: process.env.DB_HOST || "localhost",
-  user: process.env.DB_USER || "root",
-  password: process.env.DB_PASSWORD || "root",
-  database: process.env.DB_NAME || "wisdomwarfare",
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
   waitForConnections: true,
   connectionLimit: 10,
-  queueLimit: 0,
 });
 
 // ----- Game state -----
@@ -2137,20 +2136,9 @@ const PORT = process.env.PORT || 4001;
 
 server.listen(PORT, () => {
   SERVER_PORT = PORT;
-
   console.log(`🚀 Server running on port ${PORT}`);
 
-  // Background init AFTER server is live
-  setTimeout(async () => {
-    try {
-      const count = await loadQuestions();
-      if (count === 0) {
-        console.log("❌ No questions found.");
-      } else {
-        console.log(`✅ ${count} questions loaded successfully`);
-      }
-    } catch (err) {
-      console.error("Question load error:", err);
-    }
+  setTimeout(() => {
+    loadQuestions().catch(console.error);
   }, 2000);
 });
