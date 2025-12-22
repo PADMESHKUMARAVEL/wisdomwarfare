@@ -2090,6 +2090,9 @@ app.post("/admin/cleanup-users", async (req, res) => {
     connection.release();
   }
 });
+app.get("/", (req, res) => {
+  res.send("Wisdom Warfare Backend is running");
+});
 
 // ----- 404 -----
 app.use((req, res) => {
