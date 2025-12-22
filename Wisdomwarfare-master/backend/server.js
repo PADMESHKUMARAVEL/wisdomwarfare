@@ -38,8 +38,8 @@ app.use((req, res, next) => {
 });
 
 // ----- SERVER_BASE / PORT handling -----
-const DEFAULT_PORT = parseInt(process.env.PORT || "4001", 10);
-let SERVER_PORT = DEFAULT_PORT;
+//const DEFAULT_PORT = parseInt(process.env.MYSQLPORT , 10);
+const SERVER_PORT = process.env.PORT || 4001; 
 function getServerBase() {
   return process.env.SERVER_BASE || `http://localhost:${SERVER_PORT}`;
 }
@@ -54,10 +54,11 @@ const io = new Server(server, {
 
 // ----- DB -----
 const pool = mysql.createPool({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DB_NAME,
+  host: process.env.MYSQLHOST,
+  user: process.env.MYSQLUSER,
+  password: process.env.MYSQLPASSWORD,
+  database: process.env.MYSQLDATABASE,
+   port: process.env.MYSQLPORT, 
   waitForConnections: true,
   connectionLimit: 10,
 });
@@ -389,7 +390,15 @@ app.get("/test-db", async (req, res) => {
     });
   }
 });
-
+app.get("/check-questions", async (req, res) => {
+  try {
+    const [rows] = await pool.query("SELECT * FROM questions LIMIT 5");
+    res.json({ questions: rows });
+  } catch (err) {
+    console.error("DB ERROR:", err);
+    res.status(500).json({ error: err.message || JSON.stringify(err) });
+  }
+});
 // Delete all questions + game data
 app.delete("/questions/reset-all", async (req, res) => {
   const connection = await pool.getConnection();
