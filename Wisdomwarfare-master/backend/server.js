@@ -54,11 +54,11 @@ const io = new Server(server, {
 
 // ----- DB -----
 const pool = mysql.createPool({
-  host: process.env.MYSQLHOST,
-  user: process.env.MYSQLUSER,
-  password: process.env.MYSQLPASSWORD,
-  database: process.env.MYSQLDATABASE,
-   port: process.env.MYSQLPORT, 
+  host: process.env.MYSQLHOST, // Changed from DB_HOST
+  user: process.env.MYSQLUSER, // Changed from DB_USER
+  password: process.env.MYSQLPASSWORD, // Changed from DB_PASSWORD
+  database: process.env.MYSQLDATABASE, // Changed from DB_NAME
+  port: process.env.MYSQLPORT || 3306, // Crucial: Add the port[citation:10]
   waitForConnections: true,
   connectionLimit: 10,
 });
@@ -2141,13 +2141,29 @@ function startServer(port) {
 }
 
 startServer(process.env.PORT);*/
+// ----- SERVER STARTUP -----
 const PORT = process.env.PORT || 4001;
 
 server.listen(PORT, () => {
-  SERVER_PORT = PORT;
   console.log(`🚀 Server running on port ${PORT}`);
-
-  setTimeout(() => {
-    loadQuestions().catch(console.error);
+  console.log(`🌐 Server Base URL: ${getServerBase()}`);
+  console.log(`📊 Admin panel: ${getServerBase()}/admin`);
+  console.log(`🔍 Health check: ${getServerBase()}/health`);
+  
+  setTimeout(async () => {
+    try {
+      const count = await loadQuestions();
+      if (count === 0) {
+        console.log("⚠️ No questions found. Upload questions via /admin");
+      } else {
+        console.log(`✅ ${count} questions loaded`);
+      }
+      
+      // Test DB connection
+      const [dbTest] = await pool.query('SELECT 1 as test');
+      console.log("✅ Database connected successfully");
+    } catch (err) {
+      console.error("❌ Database connection failed:", err.message);
+    }
   }, 2000);
 });
