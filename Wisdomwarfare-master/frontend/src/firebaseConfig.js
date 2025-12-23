@@ -3,7 +3,7 @@ import { getAuth, GoogleAuthProvider } from "firebase/auth";
 
 const firebaseConfig = {
   apiKey: "AIzaSyD5olknMuO1mdZJ_25S96UXLEjtGuhj-WU",
-  authDomain: "gamified-learning-89fa5.firebaseapp.com",
+  authDomain: "wisdomwarfare.vercel.app",
   projectId: "gamified-learning-89fa5",
   storageBucket: "gamified-learning-89fa5.appspot.com",
   messagingSenderId: "372047414058",
