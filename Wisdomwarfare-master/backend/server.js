@@ -1713,8 +1713,7 @@ app.post("/teacher/games/:id/send-link", async (req, res) => {
     // 👉 this is where we build the link that students will use
     const clientBase =
       process.env.CLIENT_BASE_URL ||
-      process.env.FRONTEND_BASE ||
-      "http://localhost:3000";
+      process.env.FRONTEND_BASE ;
 
     // Email should point to the Welcome page (root) instead of /play
     const playLink = `${clientBase.replace(/\/$/, "")}/`;
