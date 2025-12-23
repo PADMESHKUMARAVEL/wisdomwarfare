@@ -100,6 +100,17 @@ function AppRouterContainer() {
   const [role, setRole] = useState(null);
   const navigate = useNavigate();
 
+  useEffect(() => {
+    const uid = localStorage.getItem("user_id");
+    const email = localStorage.getItem("user_email");
+    const savedRole = localStorage.getItem("user_role");
+
+    if (uid && savedRole) {
+      setUser({ user_id: uid, email });
+      setRole(savedRole);
+    }
+  }, []);
+
   const handleLogout = () => {
     setUser(null);
     setRole(null);
@@ -140,6 +151,10 @@ function AppRouterContainer() {
           <HomeLanding user={user} role={role} onLogout={handleLogout} />
         }
       />
+      <Route
+    path="/__/auth/handler"
+    element={<Navigate to="/" replace />}
+  />
 
       <Route
         path="/gamepage"
