@@ -2,8 +2,7 @@ import React, { useState } from "react";
 import { GoogleAuthProvider, signInWithPopup } from "firebase/auth";
 import { auth } from "./firebaseConfig";
 
-const API_BASE = process.env.REACT_APP_API_BASE || "http://localhost:4001";
-
+const API_BASE = process.env.REACT_APP_API_BASE ;
 export default function WelcomePage({ onLogin }) {
   const [loading, setLoading] = useState(false);
   const [err, setErr] = useState("");

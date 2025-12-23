@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 
-const API_BASE = process.env.REACT_APP_API_BASE || "http://localhost:4001";
+const API_BASE = process.env.REACT_APP_API_BASE ;
 
 // Helper function to format accuracy
 const formatAccuracy = (accuracy) => {

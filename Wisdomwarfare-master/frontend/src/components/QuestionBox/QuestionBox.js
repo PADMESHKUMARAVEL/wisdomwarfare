@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 
-const API_BASE = process.env.REACT_APP_API_BASE || "http://localhost:4000";
+const API_BASE = process.env.REACT_APP_API_BASE;
 
 function AnswerButton({ text, disabled, onClick, state }) {
   const baseClass = "w-full text-center py-6 rounded-md border-2 mb-4";
