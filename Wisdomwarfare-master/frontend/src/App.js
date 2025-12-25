@@ -95,6 +95,39 @@ function GameUIRoute({ user, onLogout, onFinish }) {
   );
 }
 
+// Add this new component at the top of AppRouterContainer function
+function FirebaseAuthRedirectHandler() {
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    console.log("Firebase auth handler triggered at:", location.pathname);
+    console.log("Full URL:", window.location.href);
+    
+    // Firebase OAuth redirects here, but we need to redirect to home
+    // Check if user is already logged in via localStorage
+    const uid = localStorage.getItem("user_id");
+    const savedRole = localStorage.getItem("user_role");
+    
+    if (uid && savedRole) {
+      console.log("User already logged in, redirecting to /home");
+      navigate("/home", { replace: true });
+    } else {
+      console.log("No user found, redirecting to /");
+      navigate("/", { replace: true });
+    }
+  }, [navigate, location]);
+
+  return (
+    <div className="flex items-center justify-center min-h-screen bg-gray-900">
+      <div className="text-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-cyan-500 mx-auto"></div>
+        <p className="mt-4 text-white">Completing authentication...</p>
+      </div>
+    </div>
+  );
+}
+
 function AppRouterContainer() {
   const [user, setUser] = useState(null);
   const [role, setRole] = useState(null);
@@ -109,8 +142,40 @@ function AppRouterContainer() {
       setUser({ user_id: uid, email });
       setRole(savedRole);
     }
-  }, []);
-
+  }, []);useEffect(() => {
+  // Import Firebase auth dynamically to avoid issues
+  import("./firebaseConfig").then(({ auth }) => {
+    const { onAuthStateChanged } = require("firebase/auth");
+    
+    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+      console.log("Firebase auth state changed:", firebaseUser);
+      
+      // If Firebase has a user but our app state doesn't
+      if (firebaseUser && !user) {
+        console.log("Firebase user detected:", firebaseUser.email);
+        
+        // Check if we have user data in localStorage
+        const savedUserId = localStorage.getItem("user_id");
+        const savedRole = localStorage.getItem("user_role");
+        
+        if (savedUserId && savedRole) {
+          // User exists in localStorage, sync with Firebase
+          const userObj = {
+            user_id: savedUserId,
+            uid: firebaseUser.uid,
+            email: firebaseUser.email,
+            display_name: firebaseUser.displayName || firebaseUser.email,
+          };
+          
+          setUser(userObj);
+          setRole(savedRole);
+        }
+      }
+    });
+    
+    return () => unsubscribe();
+  });
+}, [user]); // Only re-run when user changes
   const handleLogout = () => {
     setUser(null);
     setRole(null);
@@ -135,26 +200,19 @@ function AppRouterContainer() {
   return (
     <Routes>
       <Route
-        path="/"
-        element={
-          !user || !role ? (
-            <WelcomePage onLogin={handleLogin} />
-          ) : (
-            <Navigate to="/home" replace />
-          )
-        }
-      />
-
+  path="/"
+  element={<WelcomePage onLogin={handleLogin} />}
+/>
       <Route
         path="/home"
         element={
           <HomeLanding user={user} role={role} onLogout={handleLogout} />
         }
       />
-      <Route
-    path="/__/auth/handler"
-    element={<Navigate to="/" replace />}
-  />
+     <Route
+  path="/__/auth/handler"
+  element={<FirebaseAuthRedirectHandler />}
+/>
 
       <Route
         path="/gamepage"

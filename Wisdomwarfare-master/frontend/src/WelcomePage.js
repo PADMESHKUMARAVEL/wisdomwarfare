@@ -11,21 +11,61 @@ export default function WelcomePage({ onLogin }) {
     setErr("");
     setLoading(true);
 
+    console.log(`Starting Google sign-in as ${role}...`);
+
+  // Test if popups are allowed before proceeding
+  const popupTest = window.open("", "_blank", "width=100,height=100");
+  if (popupTest) {
+    popupTest.close();
+    console.log("Popups are allowed");
+  } else {
+    setErr("Popup blocked! Please allow popups for this site and try again.");
+    setLoading(false);
+    return;
+  }
+
     try {
       const provider = new GoogleAuthProvider();
       provider.addScope("profile");
       provider.addScope("email");
+      
+       provider.setCustomParameters({
+      prompt: "select_account",
+      login_hint: ""
+    });
+
+    console.log("Opening Google popup...");
+    
+    // Add a timeout to prevent hanging
+    const timeoutPromise = new Promise((_, reject) => {
+      setTimeout(() => reject(new Error("Sign-in timed out after 30 seconds")), 30000);
+    });
+
 
       const result = await signInWithPopup(auth, provider);
-      const fbUser = result.user;
+      console.log("Google popup completed successfully");
+
+    const fbUser = result.user;
+    if (!fbUser) {
+      throw new Error("Firebase did not return user data");
+    }
+
+    console.log("Firebase user obtained:", {
+      uid: fbUser.uid,
+      email: fbUser.email,
+      name: fbUser.displayName
+    });
+      //const fbUser = result.user;
       if (!fbUser) throw new Error("Firebase did not return a user");
 
+      
       const payload = {
         uid: fbUser.uid,
         email: fbUser.email || "",
         display_name: fbUser.displayName || fbUser.email || "User",
         role: role,
       };
+
 
       // Send to backend
       const res = await fetch(`${API_BASE}/auth/upsert-user`, {
@@ -53,6 +93,17 @@ export default function WelcomePage({ onLogin }) {
 
     } catch (error) {
       console.error("Google sign-in error:", error);
+      if (error.code === 'auth/popup-blocked') {
+      setErr("Popup was blocked by your browser. Please allow popups for this site.");
+    } else if (error.code === 'auth/popup-closed-by-user') {
+      setErr("You closed the sign-in window. Please try again.");
+    } else if (error.code === 'auth/cancelled-popup-request') {
+      setErr("Sign-in was cancelled. Please try again.");
+    } else if (error.code === 'auth/network-request-failed') {
+      setErr("Network error. Please check your internet connection.");
+    } else {
+      setErr(error.message || "Sign-in failed. Please try again.");
+    }
       setErr(error.message || "Google login failed.");
     } finally {
       setLoading(false);
@@ -118,6 +169,28 @@ export default function WelcomePage({ onLogin }) {
           <p className="mt-2">Students play games, Teachers manage content</p>
         </div>
       </div>
+      {process.env.NODE_ENV === 'development' && (
+  <div className="mt-6 p-4 bg-gray-900 rounded-lg text-xs text-gray-400">
+    <p className="font-bold mb-2">Debug Info:</p>
+    <p>API Base: {API_BASE ? '✓ Set' : '✗ Not set'}</p>
+    <p>Firebase Domain: {process.env.REACT_APP_FIREBASE_AUTH_DOMAIN || 'Not set'}</p>
+    <p>Environment: {process.env.NODE_ENV}</p>
+    <button 
+      onClick={() => {
+        console.log('LocalStorage:', {
+          user_id: localStorage.getItem('user_id'),
+          user_role: localStorage.getItem('user_role'),
+          user_email: localStorage.getItem('user_email')
+        });
+        console.log('Firebase auth:', auth);
+      }}
+      className="mt-2 px-3 py-1 bg-gray-700 rounded text-xs"
+    >
+      Debug Logs
+    </button>
+  </div>
+)}
     </div>
+    
   );
 }
