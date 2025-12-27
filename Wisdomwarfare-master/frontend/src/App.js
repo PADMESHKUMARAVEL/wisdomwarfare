@@ -147,35 +147,66 @@ function AppRouterContainer() {
   import("./firebaseConfig").then(({ auth }) => {
     const { onAuthStateChanged } = require("firebase/auth");
     
-    const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
       console.log("Firebase auth state changed:", firebaseUser);
-      
-      // If Firebase has a user but our app state doesn't
-      if (firebaseUser && !user) {
-        console.log("Firebase user detected:", firebaseUser.email);
-        
-        // Check if we have user data in localStorage
-        const savedUserId = localStorage.getItem("user_id");
-        const savedRole = localStorage.getItem("user_role");
-        
-        if (savedUserId && savedRole) {
-          // User exists in localStorage, sync with Firebase
-          const userObj = {
-            user_id: savedUserId,
+
+      if (firebaseUser) {
+        // If we already have app state, nothing to do
+        if (user) return;
+
+        // Determine role: prefer sessionStorage (set before redirect), fallback to localStorage
+        const roleFromSession = sessionStorage.getItem("signInRole") || localStorage.getItem("user_role") || "student";
+
+        // Call backend to upsert user and get app user_id
+        try {
+          const API_BASE = process.env.REACT_APP_API_BASE || "http://localhost:4001";
+          const payload = {
             uid: firebaseUser.uid,
             email: firebaseUser.email,
             display_name: firebaseUser.displayName || firebaseUser.email,
+            role: roleFromSession,
           };
-          
-          setUser(userObj);
-          setRole(savedRole);
+
+          const res = await fetch(`${API_BASE}/auth/upsert-user`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload),
+          });
+
+          if (res.ok) {
+            const data = await res.json();
+            const userObj = {
+              user_id: data.user_id,
+              uid: firebaseUser.uid,
+              email: firebaseUser.email,
+              display_name: firebaseUser.displayName || firebaseUser.email,
+            };
+
+            localStorage.setItem("user_id", data.user_id);
+            localStorage.setItem("user_email", firebaseUser.email);
+            localStorage.setItem("user_role", roleFromSession);
+            sessionStorage.removeItem("signInRole");
+
+            setUser(userObj);
+            setRole(roleFromSession);
+
+            // Navigate to home after successful sign-in
+            navigate("/home", { replace: true });
+          } else {
+            console.error("Backend upsert failed", res.status, await res.text());
+          }
+        } catch (err) {
+          console.error("Error calling backend upsert on auth state change:", err);
         }
+      } else {
+        console.log("Firebase user is null (signed out)");
       }
     });
     
     return () => unsubscribe();
   });
 }, [user]); // Only re-run when user changes
+
   const handleLogout = () => {
     setUser(null);
     setRole(null);

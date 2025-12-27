@@ -3,7 +3,7 @@ import React from "react";
 import { signInWithPopup } from "firebase/auth";
 import { auth, googleProvider } from "./firebaseConfig";  // ✅ fix here
 
-const API_BASE = process.env.REACT_APP_API_BASE;
+const API_BASE = process.env.REACT_APP_API_BASE || "http://localhost:4001";
 
 function OAuthLogin({ onLoginSuccess }) {
   const handleGoogleLogin = async () => {

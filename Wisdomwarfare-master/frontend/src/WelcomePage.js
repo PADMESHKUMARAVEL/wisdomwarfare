@@ -1,13 +1,20 @@
 import React, { useState, useEffect } from "react";
-import { 
-  GoogleAuthProvider, 
-  signInWithPopup, 
-  signInWithRedirect, 
-  getRedirectResult 
+import {
+  GoogleAuthProvider,
+  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
 } from "firebase/auth";
-import { auth, googleProvider } from "./firebaseConfig"; // Import the provider
+import { auth, googleProvider, firebaseConfig } from "./firebaseConfig"; // Import the provider and config
 
-const API_BASE = process.env.REACT_APP_API_BASE || "http://localhost:5000/api";
+// Prefer explicit account chooser and make redirect fallback easier
+try {
+  googleProvider?.setCustomParameters?.({ prompt: "select_account" });
+} catch (e) {
+  // ignore if provider isn't ready yet
+}
+
+const API_BASE = process.env.REACT_APP_API_BASE || "http://localhost:4001";
 
 export default function WelcomePage({ onLogin }) {
   const [loading, setLoading] = useState(false);
@@ -110,8 +117,15 @@ export default function WelcomePage({ onLogin }) {
       if (error.code === 'auth/popup-blocked') {
         setErr("Popup blocked! Switching to redirect method...");
         setUseRedirect(true);
-        // Retry with redirect
-        setTimeout(() => handleSignIn(role), 1000);
+        // Immediately switch to redirect flow to avoid repeated popup attempts
+        try {
+          sessionStorage.setItem('signInRole', role);
+          await signInWithRedirect(auth, googleProvider);
+          return;
+        } catch (redirectErr) {
+          console.error('Redirect fallback failed:', redirectErr);
+          setErr('Popup blocked and redirect fallback failed. Check browser settings.');
+        }
       } else if (error.code === 'auth/network-request-failed') {
         setErr("Network error. Please check your connection.");
       } else if (error.code === 'auth/popup-closed-by-user') {
@@ -206,8 +220,8 @@ export default function WelcomePage({ onLogin }) {
       <div className="max-w-md w-full p-6 bg-gray-900/50 rounded-xl border border-gray-700 text-sm">
         <h3 className="font-bold text-gray-300 mb-2">📋 Configuration Status:</h3>
         <div className="space-y-1 text-gray-400">
-          <p>• Firebase Domain: <span className={firebaseConfig.authDomain.includes('firebaseapp.com') ? "text-green-400" : "text-red-400"}>
-            {firebaseConfig.authDomain.includes('firebaseapp.com') ? "✓ Correct" : "✗ Wrong - fix this!"}
+          <p>• Firebase Domain: <span className={firebaseConfig?.authDomain?.includes('firebaseapp.com') ? "text-green-400" : "text-red-400"}>
+            {firebaseConfig?.authDomain?.includes('firebaseapp.com') ? "✓ Correct" : "✗ Wrong - fix this!"}
           </span></p>
           <p>• Current Method: <span className="text-cyan-300">{useRedirect ? "Redirect" : "Popup"}</span></p>
           <p>• API Base: <span className={API_BASE ? "text-green-400" : "text-red-400"}>
