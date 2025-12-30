@@ -290,15 +290,16 @@ function AppRouterContainer() {
 
   {/* Teacher dashboard */}
   <Route
-    path="/teacher-game-management"
-    element={
-      user && role === "teacher" ? (
-        <TeacherGameManagementPage />
-      ) : (
-        <Navigate to="/" replace />
-      )
-    }
-  />
+  path="/teacher-game-management"
+  element={
+    user && role === "teacher" ? (
+      <TeacherGameManagementPage />
+    ) : (
+      <Navigate to="/" replace />
+    )
+  }
+/>
+
 
   {/* Optional dashboard */}
   <Route
