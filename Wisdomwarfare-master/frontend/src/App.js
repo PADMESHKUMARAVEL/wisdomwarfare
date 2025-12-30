@@ -229,88 +229,97 @@ function AppRouterContainer() {
   };
 
   return (
-    <Routes>
-      <Route
-  path="/"
-  element={<WelcomePage onLogin={handleLogin} />}
-/>
-      <Route
-        path="/home"
-        element={
-          <HomeLanding user={user} role={role} onLogout={handleLogout} />
-        }
-      />
-     <Route
-  path="/__/auth/handler"
-  element={<FirebaseAuthRedirectHandler />}
-/>
+  
+  <Routes>
+  {/* Welcome / Login */}
+  <Route path="/" element={<WelcomePage />} />
 
-      <Route
-        path="/gamepage"
-        element={
-          <GamePage
-            user={user}
-            onStartGame={(code) => {
-              // code comes from GamePage when “Enter Game” is clicked
-              if (code) {
-                navigate(`/play/${encodeURIComponent(code)}`);
-              } else {
-                // fallback if GamePage doesn't send a code (old behavior)
-                navigate("/play");
-              }
-            }}
-            onLogout={handleLogout}
-          />
-        }
-      />
+  {/* Student game landing */}
+  <Route
+    path="/gamepage"
+    element={
+      user ? (
+        <GamePage
+          user={user}
+          onStartGame={(code) => {
+            if (code) {
+              navigate(`/play/${encodeURIComponent(code)}`);
+            } else {
+              navigate("/play");
+            }
+          }}
+          onLogout={handleLogout}
+        />
+      ) : (
+        <Navigate to="/" replace />
+      )
+    }
+  />
 
-      {/* Old /play route (no param) – keeps working, reads code from state/localStorage */}
-      <Route
-        path="/play"
-        element={
-          <GameUIRoute
-            user={user}
-            onLogout={handleLogout}
-            onFinish={() => {
-              navigate("/gamepage", { replace: true });
-            }}
-          />
-        }
-      />
+  {/* Play game (no param) */}
+  <Route
+    path="/play"
+    element={
+      user ? (
+        <GameUIRoute
+          user={user}
+          onLogout={handleLogout}
+          onFinish={() => navigate("/gamepage", { replace: true })}
+        />
+      ) : (
+        <Navigate to="/" replace />
+      )
+    }
+  />
 
-      {/* New route for email link: /play/:gameCode */}
-      <Route
-        path="/play/:gameCode"
-        element={
-          <GameUIRoute
-            user={user}
-            onLogout={handleLogout}
-            onFinish={() => {
-              navigate("/gamepage", { replace: true });
-            }}
-          />
-        }
-      />
+  {/* Play game (with code) */}
+  <Route
+    path="/play/:gameCode"
+    element={
+      user ? (
+        <GameUIRoute
+          user={user}
+          onLogout={handleLogout}
+          onFinish={() => navigate("/gamepage", { replace: true })}
+        />
+      ) : (
+        <Navigate to="/" replace />
+      )
+    }
+  />
 
-      <Route path="/dashboard" element={<StudentDashboard />} />
+  {/* Teacher dashboard */}
+  <Route
+    path="/teacher-game-management"
+    element={
+      user && role === "teacher" ? (
+        <TeacherGameManagementPage />
+      ) : (
+        <Navigate to="/" replace />
+      )
+    }
+  />
 
-      <Route
-        path="/teacher-game-management"
-        element={<TeacherGameManagementPage />}
-      />
+  {/* Optional dashboard */}
+  <Route
+    path="/dashboard"
+    element={user ? <StudentDashboard /> : <Navigate to="/" replace />}
+  />
 
-      <Route
-        path="*"
-        element={
-          <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 text-white">
-            <h1 className="text-4xl font-bold mb-4">404 - Page Not Found</h1>
-            <a href="/" className="text-cyan-400 underline">
-              Go back to Welcome
-            </a>
-          </div>
-        }
-      />
-    </Routes>
+  {/* 404 */}
+  <Route
+    path="*"
+    element={
+      <div className="flex flex-col items-center justify-center min-h-screen bg-gray-900 text-white">
+        <h1 className="text-4xl font-bold mb-4">404 - Page Not Found</h1>
+        <a href="/" className="text-cyan-400 underline">
+          Go back to Welcome
+        </a>
+      </div>
+    }
+  />
+</Routes>
+
   );
 }
 
