@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { io } from 'socket.io-client';
 import { formatAccuracy } from '../../utils/helpers';
 
-const API_BASE = process.env.REACT_APP_API_BASE || 'http://localhost:4001';
+const API_BASE = process.env.REACT_APP_API_BASE ;
 
 const GameUI = ({ user, onLogout, onFinish, gameCode }) => {
   const [socket, setSocket] = useState(null);
@@ -703,7 +703,7 @@ const GameUI = ({ user, onLogout, onFinish, gameCode }) => {
                     </div>
                   )}
 
-                  {result.showNextButton && (
+                {/*  {result.showNextButton && (
                     <div className="text-center">
                       <button
                         onClick={handleNextQuestion}
@@ -720,7 +720,7 @@ const GameUI = ({ user, onLogout, onFinish, gameCode }) => {
                         Click to proceed to the next question immediately
                       </p>
                     </div>
-                  )}
+                  )}*/}
 
                   {!result.showNextButton &&
                     timeLeft > 0 &&
