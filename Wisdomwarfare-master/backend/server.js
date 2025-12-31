@@ -1205,7 +1205,7 @@ io.on("connection", (socket) => {
       correct: q.correct,
       correctAnswer: correctAnswerText,
       difficulty: q.difficulty || "Medium",
-      time: 30,
+      time: 10,
       questionNumber: currentIndex + 1,
       totalQuestions: questions.length,
       gameSessionId: gameSessionId,
@@ -1251,6 +1251,7 @@ io.on("connection", (socket) => {
         });
         return;
       }
+
 
       const questionKey = `${user_id}-${questions[currentIndex].id}-${gameSessionId}`;
       if (answeredUsers.has(questionKey)) {
@@ -1510,7 +1511,7 @@ async function nextQuestion() {
     correct: q.correct,
     correctAnswer: correctAnswerText,
     difficulty: q.difficulty || "Medium",
-    time: 30,
+    time: 10,
     questionNumber: currentIndex + 1,
     totalQuestions: questions.length,
     gameSessionId: gameSessionId,
@@ -1523,7 +1524,7 @@ async function nextQuestion() {
       console.log(`⏰ Time's up for question ${currentIndex + 1}`);
       endCurrentQuestion();
     }
-  }, 30000);
+  }, 10000);
 }
 
 function startNewGameSession() {

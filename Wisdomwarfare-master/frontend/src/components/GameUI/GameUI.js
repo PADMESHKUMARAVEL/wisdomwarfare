@@ -145,7 +145,7 @@ const GameUI = ({ user, onLogout, onFinish, gameCode }) => {
       if (!mountedRef.current) return;
 
       setCurrentQuestion(question);
-      setTimeLeft(question.time || 30);
+      setTimeLeft(question.time || 10);
       setSelectedAnswer('');
       setResult({
         message: '',
